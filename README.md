@@ -80,7 +80,7 @@ Clonar o Repositório:
 
 Bash
 
-git clone [<URL_DO_SEU_REPOSITORIO>](https://github.com/PatrickCosta-dev/invest-app-project.git)
+git clone (https://github.com/PatrickCosta-dev/invest-app-project.git)
 cd invest-app-project
 Configurar Variáveis de Ambiente do Backend:
 

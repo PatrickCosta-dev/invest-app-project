@@ -1,0 +1,32 @@
+# docker-compose.yml
+services:
+  # Serviço do Banco de Dados MySQL
+  db:
+    image: mysql:8.0
+    container_name: invest-app-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: your_strong_root_password
+      MYSQL_DATABASE: invest_db
+      MYSQL_USER: invest_user
+      MYSQL_PASSWORD: your_user_password
+    ports:
+      # Expõe a porta 3306 do contêiner para a porta 3307 da sua máquina
+      - "3307:3306" # 👈 CORREÇÃO APLICADA AQUI
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  # Serviço da API Backend (Fastify)
+  backend:
+    container_name: invest-app-backend
+    build:
+      context: ./backend
+    ports:
+      - "3333:3333"
+    environment:
+      DATABASE_URL: "mysql://invest_user:your_user_password@db:3306/invest_db"
+    depends_on:
+      - db
+
+volumes:
+  mysql_data:

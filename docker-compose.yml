@@ -1,6 +1,8 @@
 # docker-compose.yml
+version: '3.8'
+
 services:
-  # Serviço do Banco de Dados MySQL
+  # Serviço do Banco de Dados MySQL (Preserved, but api_server doesn't use it yet)
   db:
     image: mysql:8.0
     container_name: invest-app-mysql
@@ -11,22 +13,45 @@ services:
       MYSQL_USER: invest_user
       MYSQL_PASSWORD: your_user_password
     ports:
-      # Expõe a porta 3306 do contêiner para a porta 3307 da sua máquina
-      - "3307:3306" # 👈 CORREÇÃO APLICADA AQUI
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    networks:
+      - invest_network
 
-  # Serviço da API Backend (Fastify)
+  # Serviço da API Backend (Node.js Express - new api_server)
   backend:
     container_name: invest-app-backend
     build:
-      context: ./backend
+      context: ./api_server # Updated to new backend path
+      dockerfile: Dockerfile # Explicitly specify Dockerfile
     ports:
       - "3333:3333"
+    volumes:
+      - ./api_server:/usr/src/app
+      - /usr/src/app/node_modules
+    networks:
+      - invest_network
+    # Removed DATABASE_URL and depends_on: db as api_server is in-memory for now
+
+  # Placeholder for Frontend service
+  frontend:
+    container_name: invest-app-frontend
+    build:
+      context: ./frontend # Assuming frontend is in ./frontend
+      dockerfile: Dockerfile # Assuming a Dockerfile exists here or will be created
+    ports:
+      - "3000:3000" # Standard Next.js port
     environment:
-      DATABASE_URL: "mysql://invest_user:your_user_password@db:3306/invest_db"
+      NEXT_PUBLIC_API_BASE_URL: "http://backend:3333"
     depends_on:
-      - db
+      - backend
+    networks:
+      - invest_network
 
 volumes:
   mysql_data:
+
+networks:
+  invest_network:
+    driver: bridge
